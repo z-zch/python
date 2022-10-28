@@ -75,6 +75,38 @@ def get_car_list(url):#得到车型的sid list
 
 car_total_name = " "
 
+def koubei(car_id):
+    # 采集口碑信息
+    url_koubei = 'https://k.autohome.com.cn/' + str(i)
+    # print(url_koubei)
+    content_koubei = htmlparser(url_koubei)
+    soup_koubei = BeautifulSoup(content_koubei, "html.parser")
+    car_koubei_soup = soup_koubei.find("ul", class_="score_tag__Wq2Z4")
+    car_koubei_test = car_koubei_soup.get_text()
+    # 将采集到的口碑信息转换成字典格式
+    if car_koubei_test != '':
+        car_koubei_test = car_koubei_test.replace('\xa0', '')
+        car_koubei = []
+        for j in car_koubei_test:
+            car_koubei.append(j)
+        car_koubei[0] = '{"' + car_koubei[0]
+        car_koubei[-1] = car_koubei[-1] + '"}'
+        for j in range(1, len(car_koubei) - 1):
+            if is_Chinese(car_koubei[j]):
+                if not is_Chinese(car_koubei[j + 1]):
+                    car_koubei[j] = car_koubei[j] + '":'
+                    car_koubei[j + 1] = '"' + car_koubei[j + 1]
+        for j in range(1, len(car_koubei) - 1):
+            if not is_Chinese(car_koubei[j]):
+                if is_Chinese(car_koubei[j + 1]):
+                    car_koubei[j] = car_koubei[j] + '",'
+                    car_koubei[j + 1] = '"' + car_koubei[j + 1]
+        car_koubei = ''.join(car_koubei)
+        # car_koubei = eval(car_koubei)
+    else:
+        car_koubei = '暂无口碑数据'  # 没有口碑数据则输出暂无口碑数据
+    print(car_koubei)
+
 def current_spider(url):
     content = htmlparser(url)
     soup = BeautifulSoup(content, "html.parser")
@@ -115,35 +147,7 @@ def current_spider(url):
         # print('car_name_only:',car_name_only)
 
         # 采集口碑信息
-        url_koubei = 'https://k.autohome.com.cn/' + str(i)
-        # print(url_koubei)
-        content_koubei = htmlparser(url_koubei)
-        soup_koubei = BeautifulSoup(content_koubei, "html.parser")
-        car_koubei_soup = soup_koubei.find("ul", class_="score_tag__Wq2Z4")
-        car_koubei_test = car_koubei_soup.get_text()
-        # 将采集到的口碑信息转换成字典格式
-        if car_koubei_test != '':
-            car_koubei_test = car_koubei_test.replace('\xa0', '')
-            car_koubei = []
-            for j in car_koubei_test:
-                car_koubei.append(j)
-            car_koubei[0] = '{"' + car_koubei[0]
-            car_koubei[-1] = car_koubei[-1] + '"}'
-            for j in range(1, len(car_koubei) - 1):
-                if is_Chinese(car_koubei[j]):
-                    if not is_Chinese(car_koubei[j + 1]):
-                        car_koubei[j] = car_koubei[j] + '":'
-                        car_koubei[j + 1] = '"' + car_koubei[j + 1]
-            for j in range(1, len(car_koubei) - 1):
-                if not is_Chinese(car_koubei[j]):
-                    if is_Chinese(car_koubei[j + 1]):
-                        car_koubei[j] = car_koubei[j] + '",'
-                        car_koubei[j + 1] = '"' + car_koubei[j + 1]
-            car_koubei = ''.join(car_koubei)
-            # car_koubei = eval(car_koubei)
-        else:
-            car_koubei = '暂无口碑数据' #没有口碑数据则输出暂无口碑数据
-        print(car_koubei)
+        koubei(i)
 
         # 下面采集车的具体型号信息
         car_model = soup.find("div", class_="intervalcont fn-hide", attrs={"id": "divSpecList" + i})
@@ -225,34 +229,7 @@ def future_spider(url):
         # print(car_name_only)
 
         # 采集口碑信息
-        url_koubei = 'https://k.autohome.com.cn/' + str(i)
-        print(url_koubei)
-        content_koubei = htmlparser(url_koubei)
-        soup_koubei = BeautifulSoup(content_koubei, "html.parser")
-        car_koubei_soup = soup_koubei.find("ul", class_="score_tag__Wq2Z4")
-        car_koubei_test = car_koubei_soup.get_text()
-        if car_koubei_test != '':
-            car_koubei_test = car_koubei_test.replace('\xa0', '')
-            car_koubei = []
-            for j in car_koubei_test:
-                car_koubei.append(j)
-            car_koubei[0] = '{"' + car_koubei[0]
-            car_koubei[-1] = car_koubei[-1] + '"}'
-            for j in range(1, len(car_koubei) - 1):
-                if is_Chinese(car_koubei[j]):
-                    if not is_Chinese(car_koubei[j + 1]):
-                        car_koubei[j] = car_koubei[j] + '":'
-                        car_koubei[j + 1] = '"' + car_koubei[j + 1]
-            for j in range(1, len(car_koubei) - 1):
-                if not is_Chinese(car_koubei[j]):
-                    if is_Chinese(car_koubei[j + 1]):
-                        car_koubei[j] = car_koubei[j] + '",'
-                        car_koubei[j + 1] = '"' + car_koubei[j + 1]
-            car_koubei = ''.join(car_koubei)
-            # car_koubei = eval(car_koubei)
-        else:
-            car_koubei = '暂无口碑数据'
-        print(car_koubei)
+        koubei(i)
 
         # 下面采集车的具体型号信息
         car_model = soup.find("div", class_="intervalcont fn-hide", attrs={"id": "divSpecList" + i})
@@ -331,35 +308,7 @@ def stop_spider(url):
         car_name_only = car_name.find("div", class_="main-title").get_text()
 
         # 采集口碑信息
-        url_koubei = 'https://k.autohome.com.cn/' + str(i)
-        print(url_koubei)
-        content_koubei = htmlparser(url_koubei)
-        soup_koubei = BeautifulSoup(content_koubei, "html.parser")
-        car_koubei_soup = soup_koubei.find("ul", class_="score_tag__Wq2Z4")
-        car_koubei_test = car_koubei_soup.get_text()
-        if car_koubei_test != '':
-            car_koubei_test = car_koubei_test.replace('\xa0', '')
-            car_koubei = []
-            for j in car_koubei_test:
-                car_koubei.append(j)
-            car_koubei[0] = '{"' + car_koubei[0]
-            car_koubei[-1] = car_koubei[-1] + '"}'
-            for j in range(1, len(car_koubei) - 1):
-                if is_Chinese(car_koubei[j]):
-                    if not is_Chinese(car_koubei[j + 1]):
-                        car_koubei[j] = car_koubei[j] + '":'
-                        car_koubei[j + 1] = '"' + car_koubei[j + 1]
-            for j in range(1, len(car_koubei) - 1):
-                if not is_Chinese(car_koubei[j]):
-                    if is_Chinese(car_koubei[j + 1]):
-                        car_koubei[j] = car_koubei[j] + '",'
-                        car_koubei[j + 1] = '"' + car_koubei[j + 1]
-            car_koubei = ''.join(car_koubei)
-            # car_koubei = eval(car_koubei)
-        else:
-            car_koubei = '暂无口碑数据'
-        print(car_koubei)
-
+        koubei(i)
 
         # 下面采集车的具体型号信息
         car_model = soup.find("div", class_="intervalcont fn-hide", attrs={"id": "divSpecList" + i})
@@ -423,7 +372,6 @@ def spider(i):
         for sort_name_2 in sort_name_3.find_all("a"):
             if (sort_name_2["title"] == "在售是指官方已经公布售价且正式在国内销售的车型"):
                 sort_url_courrent = "https://car.autohome.com.cn" + sort_name_2["href"]
-                urls.append(sort_url_courrent)  # zch:暂时没用
                 print(sort_url_courrent)
                 current_spider(sort_url_courrent)
                 content = htmlparser(sort_url_courrent)
