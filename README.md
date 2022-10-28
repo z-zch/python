@@ -62,4 +62,4 @@ koubei(car_id)
 
 根据car_id进入URL('https://k.autohome.com.cn/' + str(car_id))获得用户评价并拼接成字典格式
 
-![image-20221028131736191](img\image-20221028131736191.png)
+<img src="img\image-20221028131736191.png" alt="image-20221028131736191" style="zoom:67%;" />
