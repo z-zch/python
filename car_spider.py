@@ -51,6 +51,7 @@ def deliver_current_change(content):
     # print('deliver:',deliver_key)
     return deliver_key
 
+# 获得经销商价格
 def deliver_future_change(content):
     con = re.sub(r"LoadDealerPrice", "", str(content))
     con2 = con[1:-1]
@@ -120,6 +121,7 @@ def current_spider(url):
         soup_koubei = BeautifulSoup(content_koubei, "html.parser")
         car_koubei_soup = soup_koubei.find("ul", class_="score_tag__Wq2Z4")
         car_koubei_test = car_koubei_soup.get_text()
+        # 将采集到的口碑信息转换成字典格式
         if car_koubei_test != '':
             car_koubei_test = car_koubei_test.replace('\xa0', '')
             car_koubei = []
@@ -140,7 +142,7 @@ def current_spider(url):
             car_koubei = ''.join(car_koubei)
             # car_koubei = eval(car_koubei)
         else:
-            car_koubei = '暂无口碑数据'
+            car_koubei = '暂无口碑数据' #没有口碑数据则输出暂无口碑数据
         print(car_koubei)
 
         # 下面采集车的具体型号信息
@@ -157,7 +159,8 @@ def current_spider(url):
                         key = ke
                         key = str(key)
                         if key == li["data-value"]:
-                            flag = True  # 这里卡了一会儿bug，主要原因是：在字典中的数字被认为int型，不是str型
+                            flag = True
+                            # 拼接写入data.txt
                             # print('car_model_size_only',car_model_size_only)
                             # print('str(deliver_key[ke])',str(deliver_key[ke]))
                             # print('li.find("div", class_="interval01-list-cars-infor").get_text()',li.find("div", class_="interval01-list-cars-infor").get_text())
@@ -265,7 +268,7 @@ def future_spider(url):
                         key = ke
                         key = str(key)
                         if key == li["data-value"]:
-                            flag = True  # 这里卡了一会儿bug，主要原因是：在字典中的数字被认为int型，不是str型
+                            flag = True
                             with open("data.txt", 'a', encoding="utf-8") as f:
                                 f.write(
                                     car_total_name + "*" + car_name2 + "*" + car_name_only + "*即将销售*" + car_model_size_only + "*" +
@@ -416,6 +419,7 @@ def spider(i):
         soup = BeautifulSoup(content, "html.parser")
         sort_name_1 = soup.find("div", attrs={"class": "tab-nav border-t-no"})
         sort_name_3 = sort_name_1.find("ul", attrs={"data-trigger": "click"})
+        # 查找在售，停售，即将销售
         for sort_name_2 in sort_name_3.find_all("a"):
             if (sort_name_2["title"] == "在售是指官方已经公布售价且正式在国内销售的车型"):
                 sort_url_courrent = "https://car.autohome.com.cn" + sort_name_2["href"]
@@ -496,7 +500,5 @@ def main():
         i = i.strip("\n")
         url = 'https://car.autohome.com.cn'+i
         spider(url)
-    # for url in urls:
-    #     with open("urls.text","a",encoding="utf-8") as f:
-    #         f.write(url+"\n")
+
 main()
