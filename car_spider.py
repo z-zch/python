@@ -1,4 +1,6 @@
 # coding==utf-8
+from threading import Thread
+
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -88,6 +90,7 @@ def koubei(car_id):
     # 采集口碑信息
     url_koubei = 'https://k.autohome.com.cn/' + str(car_id)
     # print(url_koubei)
+    time.sleep(1)
     content_koubei = htmlparser(url_koubei)
     soup_koubei = BeautifulSoup(content_koubei, "html.parser")
     car_koubei_soup = soup_koubei.find("ul", class_="score_tag__Wq2Z4")
@@ -407,66 +410,76 @@ def spider(i):
                         current_spider(next_url)
                         time.sleep(1)
                         urls.append(next_url)
-            if (sort_name_2["title"] == "即将销售是指近期即将在国内销售的车型"):
-                sort_url_future = "https://car.autohome.com.cn" + sort_name_2["href"]
-                urls.append(sort_url_future)
-                future_spider(sort_url_future)
-                content = htmlparser(sort_url_future)
-                soup = BeautifulSoup(content, "html.parser")
-                # 判断是否有下一页
-                div = soup.find("div", class_="price-page")
-                if div == None:
-                    pass
-                else:
-                    next_url = div.find("a", class_="page-item-next")
-                    print(next_url["href"])
-                    if next_url == None:
-                        pass
-                    else:
-                        next_url = "https://car.autohome.com.cn" + next_url["href"]
-                        future_spider(next_url)
-                        time.sleep(1)
-                        urls.append(next_url)
-            if (sort_name_2["title"] == "停售是指厂商已停产并且经销商处已无新车销售的车型"):
-                sort_url_stop = "https://car.autohome.com.cn" + sort_name_2["href"]
-                urls.append(sort_url_stop)
-                stop_spider(sort_url_stop)
-                content = htmlparser(sort_url_stop)
-                soup = BeautifulSoup(content, "html.parser")
-                # 判断是否有下一页
-                div = soup.find("div", class_="price-page")
-                if div == None:
-                    pass
-                else:
-                    next_url = div.find("a", class_="page-item-next")
-                    print(next_url["href"])
-                    if next_url == None:
-                        pass
-                    else:
-                        next_url = "https://car.autohome.com.cn" + next_url["href"]
-                        stop_spider(next_url)
-                        time.sleep(1)
-                        urls.append(next_url)
+            # if (sort_name_2["title"] == "即将销售是指近期即将在国内销售的车型"):
+            #     sort_url_future = "https://car.autohome.com.cn" + sort_name_2["href"]
+            #     urls.append(sort_url_future)
+            #     future_spider(sort_url_future)
+            #     content = htmlparser(sort_url_future)
+            #     soup = BeautifulSoup(content, "html.parser")
+            #     # 判断是否有下一页
+            #     div = soup.find("div", class_="price-page")
+            #     if div == None:
+            #         pass
+            #     else:
+            #         next_url = div.find("a", class_="page-item-next")
+            #         print(next_url["href"])
+            #         if next_url == None:
+            #             pass
+            #         else:
+            #             next_url = "https://car.autohome.com.cn" + next_url["href"]
+            #             future_spider(next_url)
+            #             time.sleep(1)
+            #             urls.append(next_url)
+            # if (sort_name_2["title"] == "停售是指厂商已停产并且经销商处已无新车销售的车型"):
+            #     sort_url_stop = "https://car.autohome.com.cn" + sort_name_2["href"]
+            #     urls.append(sort_url_stop)
+            #     stop_spider(sort_url_stop)
+            #     content = htmlparser(sort_url_stop)
+            #     soup = BeautifulSoup(content, "html.parser")
+            #     # 判断是否有下一页
+            #     div = soup.find("div", class_="price-page")
+            #     if div == None:
+            #         pass
+            #     else:
+            #         next_url = div.find("a", class_="page-item-next")
+            #         print(next_url["href"])
+            #         if next_url == None:
+            #             pass
+            #         else:
+            #             next_url = "https://car.autohome.com.cn" + next_url["href"]
+            #             stop_spider(next_url)
+            #             time.sleep(1)
+            #             urls.append(next_url)
 
 
-def main():
+def txt_load():
     global urls
     with open("car_url.txt", "r") as f:
         url_list = f.readlines()
     with open("car_url_name.txt", 'r', encoding="utf-8") as f:
         last_url_name = f.readlines()
-    count = 0
-
-    for i in url_list:
-        car_list = []
-        global car_total_name
-        car_total_name = last_url_name[count]
-        car_total_name = car_total_name.strip("\n")
-        print(car_total_name)
-        count = count + 1
-        i = i.strip("\n")
-        url = 'https://car.autohome.com.cn' + i
-        spider(url)
+    return url_list, last_url_name
 
 
-main()
+def main(i):
+
+    # global car_total_name
+    # car_total_name = last_url_name[i]
+    # car_total_name = car_total_name.strip("\n")
+    # print(car_total_name)
+    i = i.strip("\n")
+    url = 'https://car.autohome.com.cn' + i
+    spider(url)
+
+# url_list, last_url_name = txt_load()
+# main(url_list[1])
+
+if __name__ == '__main__':
+    url_list, last_url_name = txt_load()
+    Threads = []
+    for i in range(len(url_list)):
+        t = Thread(target=main, args=(url_list[i],))
+        t.start()
+        Threads.append(t)
+    for t in Threads:
+        t.join()
