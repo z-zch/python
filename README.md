@@ -26,7 +26,7 @@
 
 <img src="img\image-20221028125738021.png" alt="image-20221028125738021" style="zoom:50%;" />
 
-根据在售，停售，即将销售判断使用
+根据在售，停售，即将销售判断使用对应模块
 
 1. ```
    current_spider(url)
@@ -54,7 +54,7 @@ get_car_list(url)
 deliver_current_change(content)
 deliver_future_change(content)
 ```
-根据一个网络请求相信获得经销商报价
+根据一个网络请求响应获得经销商报价
 
 ```
 koubei(car_id)
