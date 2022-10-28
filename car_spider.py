@@ -28,7 +28,8 @@ def LoadUserAgents(uafile):  # 从user_agents.txt文件里面随机选择一个u
 
 
 uas = LoadUserAgents("user_agents.txt")
-
+car_total_name = " "
+result = []     # 存储最终结果
 
 def htmlparser(url):  # 解析网页的函数
     ua = random.choice(uas)
@@ -83,9 +84,6 @@ def get_car_list(url):  # 得到车型的sid list
     return car_list
 
 
-car_total_name = " "
-
-
 def koubei(car_id):
     # 采集口碑信息
     url_koubei = 'https://k.autohome.com.cn/' + str(car_id)
@@ -118,7 +116,6 @@ def koubei(car_id):
     else:
         car_koubei = '暂无口碑数据'  # 没有口碑数据则输出暂无口碑数据
     return car_koubei
-
 
 def current_spider(url):
     content = htmlparser(url)
@@ -167,7 +164,7 @@ def current_spider(url):
         for k in car_model.find_all("div", class_="interval01"):
             car_model_size = k.find("div", class_="interval01-title title-cont")  # 6.0升 517马力的父节点
             car_model_size_only = car_model_size.find("div", class_="interval01-list-cars").get_text()  # 6.0升 517马力
-            print(car_model_size_only)
+            # print(car_model_size_only)
             car_model_size_value = k.find_all("ul", class_="interval01-list")  # 该属性的下属分类（具体类型）
             for g in car_model_size_value:
                 for li in g.find_all("li"):
@@ -178,38 +175,21 @@ def current_spider(url):
                         if key == li["data-value"]:
                             flag = True
                             # 拼接写入data.txt
-                            # print('car_model_size_only',car_model_size_only)
-                            # print('str(deliver_key[ke])',str(deliver_key[ke]))
-                            # print('li.find("div", class_="interval01-list-cars-infor").get_text()',li.find("div", class_="interval01-list-cars-infor").get_text())
-                            # print('li.find("div", class_="interval01-list-guidance").get_text()',li.find("div", class_="interval01-list-guidance").get_text())
-                            with open("data.txt", 'a', encoding="utf-8") as f:
-                                f.write(
-                                    car_total_name + "*" + car_name2 + "*" + car_name_only + "*在售*" + car_model_size_only + "*" +
-                                    str(deliver_key[ke]) + "*" +
-                                    li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
-                                    li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
-                                )
-                            with open("data.txt", "a", encoding="utf-8") as f:
-                                f.write("\n")
-                                print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ",
-                                      str(deliver_key[ke]), " ", li.get_text() + car_koubei)
-                            break
-                        else:
-                            pass
-                    if flag == False:
-                        with open("data.txt", 'a', encoding="utf-8") as f:
-                            f.write(
+                            result.append(
                                 car_total_name + "*" + car_name2 + "*" + car_name_only + "*在售*" + car_model_size_only + "*" +
-                                "暂无报价*" +
+                                str(deliver_key[ke]) + "*" +
                                 li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
                                 li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
                             )
-                        with open("data.txt", "a", encoding="utf-8") as f:
-                            f.write("\n")
-                        print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ", "暂无报价", " ",
-                              li.get_text() + car_koubei)
-                    else:
-                        pass
+                    if flag == False:
+                        result.append(
+                            car_total_name + "*" + car_name2 + "*" + car_name_only + "*在售*" + car_model_size_only + "*" +
+                            "暂无报价*" +
+                            li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
+                            li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
+                        )
+            # print( Complete')
+
     time.sleep(1)
 
 
@@ -250,7 +230,6 @@ def future_spider(url):
         for k in car_model.find_all("div", class_="interval01"):
             car_model_size = k.find("div", class_="interval01-title title-cont")  # 6.0升 517马力的父节点
             car_model_size_only = car_model_size.find("div", class_="interval01-list-cars").get_text()  # 6.0升 517马力
-            print(car_model_size_only)
             car_model_size_value = k.find_all("ul", class_="interval01-list")  # 该属性的下属分类（具体类型）
             for g in car_model_size_value:
                 for li in g.find_all("li"):
@@ -260,32 +239,20 @@ def future_spider(url):
                         key = str(key)
                         if key == li["data-value"]:
                             flag = True
-                            with open("data.txt", 'a', encoding="utf-8") as f:
-                                f.write(
-                                    car_total_name + "*" + car_name2 + "*" + car_name_only + "*即将销售*" + car_model_size_only + "*" +
-                                    str(deliver_key[ke]) + "*" +
-                                    li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
-                                    li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei)
-                            with open("data.txt", "a", encoding="utf-8") as f:
-                                f.write("\n")
-                            print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ",
-                                  str(deliver_key[ke]), " ", li.get_text() + car_koubei)
-                            break
-                        else:
-                            pass
-                    if flag == False:
-                        with open("data.txt", 'a', encoding="utf-8") as f:
-                            f.write(
+                            result.append(
                                 car_total_name + "*" + car_name2 + "*" + car_name_only + "*即将销售*" + car_model_size_only + "*" +
-                                "暂无报价*" +
+                                str(deliver_key[ke]) + "*" +
                                 li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
-                                li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei)
-                        with open("data.txt", "a", encoding="utf-8") as f:
-                            f.write("\n")
-                        print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ", "暂无报价", " ",
-                              li.get_text() + car_koubei)
-                    else:
-                        pass
+                                li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
+                            )
+                    if flag == False:
+                        result.append(
+                            car_total_name + "*" + car_name2 + "*" + car_name_only + "*即将销售*" + car_model_size_only + "*" +
+                            "暂无报价*" +
+                            li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
+                            li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
+                        )
+            # print('k: ', k, ' Complete')
     time.sleep(1)
 
 
@@ -340,36 +307,21 @@ def stop_spider(url):
                         key = ke
                         key = str(key)
                         if key == li["data-value"]:
-                            flag = True  # 这里卡了一会儿bug，主要原因是：在字典中的数字被认为int型，不是str型
-                            with open("data.txt", 'a', encoding="utf-8") as f:
-                                f.write(
-                                    car_total_name + "*" + car_name2 + "*" + car_name_only + "*停售*" + car_model_size_only + "*" +
-                                    str(deliver_key[ke]) + "*" +
-                                    li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
-                                    li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
-                                )
-                            with open("data.txt", "a", encoding="utf-8") as f:
-                                f.write("\n")
-                            print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ",
-                                  str(deliver_key[ke]), " ", li.get_text() + car_koubei)
-                            break
-                        else:
-                            pass
-                    if flag == False:
-                        # print(car_koubei,type(car_koubei))
-                        with open("data.txt", 'a', encoding="utf-8") as f:
-                            f.write(
+                            flag = True
+                            result.append(
                                 car_total_name + "*" + car_name2 + "*" + car_name_only + "*停售*" + car_model_size_only + "*" +
-                                "暂无报价*" +
+                                str(deliver_key[ke]) + "*" +
                                 li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
                                 li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
                             )
-                        with open("data.txt", "a", encoding="utf-8") as f:
-                            f.write("\n")
-                        print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ", "暂无报价", " ",
-                              li.get_text() + car_koubei)
-                    else:
-                        pass
+                    if flag == False:
+                        result.append(
+                            car_total_name + "*" + car_name2 + "*" + car_name_only + "*停售*" + car_model_size_only + "*" +
+                            "暂无报价*" +
+                            li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
+                            li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
+                        )
+            # print('k: ', k, ' Complete')
     time.sleep(1)
 
 
@@ -410,46 +362,46 @@ def spider(i):
                         current_spider(next_url)
                         time.sleep(1)
                         urls.append(next_url)
-            # if (sort_name_2["title"] == "即将销售是指近期即将在国内销售的车型"):
-            #     sort_url_future = "https://car.autohome.com.cn" + sort_name_2["href"]
-            #     urls.append(sort_url_future)
-            #     future_spider(sort_url_future)
-            #     content = htmlparser(sort_url_future)
-            #     soup = BeautifulSoup(content, "html.parser")
-            #     # 判断是否有下一页
-            #     div = soup.find("div", class_="price-page")
-            #     if div == None:
-            #         pass
-            #     else:
-            #         next_url = div.find("a", class_="page-item-next")
-            #         print(next_url["href"])
-            #         if next_url == None:
-            #             pass
-            #         else:
-            #             next_url = "https://car.autohome.com.cn" + next_url["href"]
-            #             future_spider(next_url)
-            #             time.sleep(1)
-            #             urls.append(next_url)
-            # if (sort_name_2["title"] == "停售是指厂商已停产并且经销商处已无新车销售的车型"):
-            #     sort_url_stop = "https://car.autohome.com.cn" + sort_name_2["href"]
-            #     urls.append(sort_url_stop)
-            #     stop_spider(sort_url_stop)
-            #     content = htmlparser(sort_url_stop)
-            #     soup = BeautifulSoup(content, "html.parser")
-            #     # 判断是否有下一页
-            #     div = soup.find("div", class_="price-page")
-            #     if div == None:
-            #         pass
-            #     else:
-            #         next_url = div.find("a", class_="page-item-next")
-            #         print(next_url["href"])
-            #         if next_url == None:
-            #             pass
-            #         else:
-            #             next_url = "https://car.autohome.com.cn" + next_url["href"]
-            #             stop_spider(next_url)
-            #             time.sleep(1)
-            #             urls.append(next_url)
+            if (sort_name_2["title"] == "即将销售是指近期即将在国内销售的车型"):
+                sort_url_future = "https://car.autohome.com.cn" + sort_name_2["href"]
+                urls.append(sort_url_future)
+                future_spider(sort_url_future)
+                content = htmlparser(sort_url_future)
+                soup = BeautifulSoup(content, "html.parser")
+                # 判断是否有下一页
+                div = soup.find("div", class_="price-page")
+                if div == None:
+                    pass
+                else:
+                    next_url = div.find("a", class_="page-item-next")
+                    print(next_url["href"])
+                    if next_url == None:
+                        pass
+                    else:
+                        next_url = "https://car.autohome.com.cn" + next_url["href"]
+                        future_spider(next_url)
+                        time.sleep(1)
+                        urls.append(next_url)
+            if (sort_name_2["title"] == "停售是指厂商已停产并且经销商处已无新车销售的车型"):
+                sort_url_stop = "https://car.autohome.com.cn" + sort_name_2["href"]
+                urls.append(sort_url_stop)
+                stop_spider(sort_url_stop)
+                content = htmlparser(sort_url_stop)
+                soup = BeautifulSoup(content, "html.parser")
+                # 判断是否有下一页
+                div = soup.find("div", class_="price-page")
+                if div == None:
+                    pass
+                else:
+                    next_url = div.find("a", class_="page-item-next")
+                    print(next_url["href"])
+                    if next_url == None:
+                        pass
+                    else:
+                        next_url = "https://car.autohome.com.cn" + next_url["href"]
+                        stop_spider(next_url)
+                        time.sleep(1)
+                        urls.append(next_url)
 
 
 def txt_load():
@@ -483,3 +435,8 @@ if __name__ == '__main__':
         Threads.append(t)
     for t in Threads:
         t.join()
+    for i in result:
+        with open("data.txt", 'a', encoding="utf-8") as f:
+            f.write(i)
+            f.write("\n")
+            f.close()
