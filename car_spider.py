@@ -114,7 +114,7 @@ def koubei(car_id):
         # car_koubei = eval(car_koubei)
     else:
         car_koubei = '暂无口碑数据'  # 没有口碑数据则输出暂无口碑数据
-    print(car_koubei)
+    return car_koubei
 
 
 def current_spider(url):
@@ -353,6 +353,7 @@ def stop_spider(url):
                         else:
                             pass
                     if flag == False:
+                        # print(car_koubei,type(car_koubei))
                         with open("data.txt", 'a', encoding="utf-8") as f:
                             f.write(
                                 car_total_name + "*" + car_name2 + "*" + car_name_only + "*停售*" + car_model_size_only + "*" +
