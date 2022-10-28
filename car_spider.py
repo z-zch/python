@@ -1,4 +1,4 @@
-#coding==utf-8
+# coding==utf-8
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -7,13 +7,15 @@ import json
 import random
 import time
 
+
 def is_Chinese(word):
     for ch in word:
         if '\u4e00' <= ch <= '\u9fff':
             return True
     return False
 
-def LoadUserAgents(uafile):#从user_agents.txt文件里面随机选择一个user_agent,防封
+
+def LoadUserAgents(uafile):  # 从user_agents.txt文件里面随机选择一个user_agent,防封
     uas = []
     with open(uafile, 'rb') as uaf:
         for ua in uaf.readlines():
@@ -21,28 +23,32 @@ def LoadUserAgents(uafile):#从user_agents.txt文件里面随机选择一个user
                 uas.append(ua.strip()[1:-1 - 1])
     random.shuffle(uas)
     return uas
+
+
 uas = LoadUserAgents("user_agents.txt")
 
-def htmlparser(url):#解析网页的函数
+
+def htmlparser(url):  # 解析网页的函数
     ua = random.choice(uas)
     user_agent = ua
     headers = {'User-agent': user_agent,
-               'Referer': 'https://car.autohome.com.cn.html',}#加上header伪装成浏览器防止被封
-    r = requests.get(url, headers=headers)#get请求
+               'Referer': 'https://car.autohome.com.cn.html', }  # 加上header伪装成浏览器防止被封
+    r = requests.get(url, headers=headers)  # get请求
     r.raise_for_status()
     r.encoding = r.apparent_encoding
     content = r.text
     return content
 
+
 # 获取经销商价格
 def deliver_current_change(content):
     # print('调用了该函数')
     # print('content:',content)
-    con = re.sub(r"LoadDealerPrice", "", str(content)) # 删除LoadDealerPrice
+    con = re.sub(r"LoadDealerPrice", "", str(content))  # 删除LoadDealerPrice
     # print('con:',con)
-    con2 = con[1:-1] # 删除空格
+    con2 = con[1:-1]  # 删除空格
     # print('con2:',con2)
-    last = json.loads(con2) #转换成字典格式
+    last = json.loads(con2)  # 转换成字典格式
     # print('last:',last)
     deliver_key = {}
     # 从中取出经销商价格
@@ -50,6 +56,7 @@ def deliver_current_change(content):
         deliver_key[i["SpecId"]] = i["Price"]
     # print('deliver:',deliver_key)
     return deliver_key
+
 
 # 获得经销商价格
 def deliver_future_change(content):
@@ -62,10 +69,11 @@ def deliver_future_change(content):
     # print(deliver_key)
     return deliver_key
 
-def get_car_list(url):#得到车型的sid list
+
+def get_car_list(url):  # 得到车型的sid list
     content = htmlparser(url)
-    soup = BeautifulSoup(content,"html.parser")
-    car_list_soup = soup.find_all("div",class_= "list-cont")
+    soup = BeautifulSoup(content, "html.parser")
+    car_list_soup = soup.find_all("div", class_="list-cont")
     car_list = []
     for i in car_list_soup:
         car_id = i["data-value"]
@@ -75,9 +83,10 @@ def get_car_list(url):#得到车型的sid list
 
 car_total_name = " "
 
+
 def koubei(car_id):
     # 采集口碑信息
-    url_koubei = 'https://k.autohome.com.cn/' + str(i)
+    url_koubei = 'https://k.autohome.com.cn/' + str(car_id)
     # print(url_koubei)
     content_koubei = htmlparser(url_koubei)
     soup_koubei = BeautifulSoup(content_koubei, "html.parser")
@@ -107,11 +116,12 @@ def koubei(car_id):
         car_koubei = '暂无口碑数据'  # 没有口碑数据则输出暂无口碑数据
     print(car_koubei)
 
+
 def current_spider(url):
     content = htmlparser(url)
     soup = BeautifulSoup(content, "html.parser")
     car_list = get_car_list(url)
-    car_name2 = soup.find("h2",class_="fn-left cartab-title-name").get_text()
+    car_name2 = soup.find("h2", class_="fn-left cartab-title-name").get_text()
     # print('car_name2:',car_name2)
     # time.sleep(5)
     # print('url: ',url,'car_list:',car_list)
@@ -147,7 +157,7 @@ def current_spider(url):
         # print('car_name_only:',car_name_only)
 
         # 采集口碑信息
-        koubei(i)
+        car_koubei = koubei(i)
 
         # 下面采集车的具体型号信息
         car_model = soup.find("div", class_="intervalcont fn-hide", attrs={"id": "divSpecList" + i})
@@ -174,12 +184,12 @@ def current_spider(url):
                                     car_total_name + "*" + car_name2 + "*" + car_name_only + "*在售*" + car_model_size_only + "*" +
                                     str(deliver_key[ke]) + "*" +
                                     li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
-                                    li.find("div", class_="interval01-list-guidance").get_text() + "*"+ car_koubei
+                                    li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
                                 )
-                            with open("data.txt","a",encoding="utf-8") as f:
+                            with open("data.txt", "a", encoding="utf-8") as f:
                                 f.write("\n")
                                 print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ",
-                                      str(deliver_key[ke]), " ", li.get_text()+ car_koubei)
+                                      str(deliver_key[ke]), " ", li.get_text() + car_koubei)
                             break
                         else:
                             pass
@@ -189,21 +199,22 @@ def current_spider(url):
                                 car_total_name + "*" + car_name2 + "*" + car_name_only + "*在售*" + car_model_size_only + "*" +
                                 "暂无报价*" +
                                 li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
-                                li.find("div", class_="interval01-list-guidance").get_text() + "*"+ car_koubei
+                                li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
                             )
                         with open("data.txt", "a", encoding="utf-8") as f:
                             f.write("\n")
                         print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ", "暂无报价", " ",
-                                      li.get_text()+ car_koubei)
+                              li.get_text() + car_koubei)
                     else:
                         pass
     time.sleep(1)
+
 
 def future_spider(url):
     content = htmlparser(url)
     soup = BeautifulSoup(content, "html.parser")
     car_list = get_car_list(url)
-    car_name2 = soup.find("h2",class_="fn-left cartab-title-name").get_text()
+    car_name2 = soup.find("h2", class_="fn-left cartab-title-name").get_text()
     for i in car_list:
         # 得到经销商报价
         headers = {'Accept': '*/*',
@@ -229,7 +240,7 @@ def future_spider(url):
         # print(car_name_only)
 
         # 采集口碑信息
-        koubei(i)
+        car_koubei = koubei(i)
 
         # 下面采集车的具体型号信息
         car_model = soup.find("div", class_="intervalcont fn-hide", attrs={"id": "divSpecList" + i})
@@ -251,11 +262,11 @@ def future_spider(url):
                                     car_total_name + "*" + car_name2 + "*" + car_name_only + "*即将销售*" + car_model_size_only + "*" +
                                     str(deliver_key[ke]) + "*" +
                                     li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
-                                    li.find("div", class_="interval01-list-guidance").get_text() + "*"+ car_koubei)
-                            with open("data.txt","a",encoding="utf-8") as f:
+                                    li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei)
+                            with open("data.txt", "a", encoding="utf-8") as f:
                                 f.write("\n")
                             print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ",
-                                      str(deliver_key[ke]), " ", li.get_text()+ car_koubei)
+                                  str(deliver_key[ke]), " ", li.get_text() + car_koubei)
                             break
                         else:
                             pass
@@ -263,21 +274,23 @@ def future_spider(url):
                         with open("data.txt", 'a', encoding="utf-8") as f:
                             f.write(
                                 car_total_name + "*" + car_name2 + "*" + car_name_only + "*即将销售*" + car_model_size_only + "*" +
-                               "暂无报价*" +
+                                "暂无报价*" +
                                 li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
                                 li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei)
                         with open("data.txt", "a", encoding="utf-8") as f:
                             f.write("\n")
                         print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ", "暂无报价", " ",
-                                      li.get_text()+ car_koubei)
+                              li.get_text() + car_koubei)
                     else:
                         pass
     time.sleep(1)
+
+
 def stop_spider(url):
     content = htmlparser(url)
     soup = BeautifulSoup(content, "html.parser")
     car_list = get_car_list(url)
-    car_name2 = soup.find("h2",class_="fn-left cartab-title-name").get_text()
+    car_name2 = soup.find("h2", class_="fn-left cartab-title-name").get_text()
     for i in car_list:
         # 得到经销商报价
         headers = {'Accept': '*/*',
@@ -308,7 +321,7 @@ def stop_spider(url):
         car_name_only = car_name.find("div", class_="main-title").get_text()
 
         # 采集口碑信息
-        koubei(i)
+        car_koubei = koubei(i)
 
         # 下面采集车的具体型号信息
         car_model = soup.find("div", class_="intervalcont fn-hide", attrs={"id": "divSpecList" + i})
@@ -332,10 +345,10 @@ def stop_spider(url):
                                     li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
                                     li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
                                 )
-                            with open("data.txt","a",encoding="utf-8") as f :
+                            with open("data.txt", "a", encoding="utf-8") as f:
                                 f.write("\n")
                             print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ",
-                                      str(deliver_key[ke]), " ", li.get_text() + car_koubei)
+                                  str(deliver_key[ke]), " ", li.get_text() + car_koubei)
                             break
                         else:
                             pass
@@ -345,17 +358,20 @@ def stop_spider(url):
                                 car_total_name + "*" + car_name2 + "*" + car_name_only + "*停售*" + car_model_size_only + "*" +
                                 "暂无报价*" +
                                 li.find("div", class_="interval01-list-cars-infor").get_text() + "*" +
-                                li.find("div", class_="interval01-list-guidance").get_text() + "*"+ car_koubei
-                                )
+                                li.find("div", class_="interval01-list-guidance").get_text() + "*" + car_koubei
+                            )
                         with open("data.txt", "a", encoding="utf-8") as f:
                             f.write("\n")
                         print(car_total_name, " ", car_name_only, " ", car_model_size_only, " ", "暂无报价", " ",
-                                      li.get_text()+ car_koubei)
+                              li.get_text() + car_koubei)
                     else:
                         pass
     time.sleep(1)
 
-urls =[]
+
+urls = []
+
+
 def spider(i):
     content = htmlparser(i)
     soup = BeautifulSoup(content, "html.parser")
@@ -430,23 +446,26 @@ def spider(i):
                         stop_spider(next_url)
                         time.sleep(1)
                         urls.append(next_url)
+
+
 def main():
     global urls
     with open("car_url.txt", "r") as f:
         url_list = f.readlines()
-    with open("car_url_name.txt", 'r',encoding="utf-8") as f:
-         last_url_name = f.readlines()
+    with open("car_url_name.txt", 'r', encoding="utf-8") as f:
+        last_url_name = f.readlines()
     count = 0
 
     for i in url_list:
-        car_list =[]
+        car_list = []
         global car_total_name
         car_total_name = last_url_name[count]
         car_total_name = car_total_name.strip("\n")
         print(car_total_name)
         count = count + 1
         i = i.strip("\n")
-        url = 'https://car.autohome.com.cn'+i
+        url = 'https://car.autohome.com.cn' + i
         spider(url)
+
 
 main()
