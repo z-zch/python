@@ -1,6 +1,5 @@
 # coding==utf-8
 from threading import Thread
-
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -121,10 +120,8 @@ def current_spider(url):
     content = htmlparser(url)
     soup = BeautifulSoup(content, "html.parser")
     car_list = get_car_list(url)
-    car_name2 = soup.find("h2", class_="fn-left cartab-title-name").get_text()
-    # print('car_name2:',car_name2)
-    # time.sleep(5)
-    # print('url: ',url,'car_list:',car_list)
+    car_name2 = soup.find("h2", class_="fn-left cartab-title-name")
+    car_name2 = re.findall(re.compile(r'<a class="font-16" href="(.*?)">(.*?)</a></h2>'),str(car_name2))[0][1] # 正则表达式需要传入字符串
     for i in car_list:
         # 得到经销商报价
         headers = {'Accept': '*/*',
@@ -153,8 +150,6 @@ def current_spider(url):
         car = soup.find("div", class_="list-cont", attrs={"data-value": i})
         car_name = car.find("div", class_="list-cont-main")
         car_name_only = car_name.find("div", class_="main-title").get_text()
-        # print('car_name:',car_name)
-        # print('car_name_only:',car_name_only)
 
         # 采集口碑信息
         car_koubei = koubei(i)
@@ -197,7 +192,8 @@ def future_spider(url):
     content = htmlparser(url)
     soup = BeautifulSoup(content, "html.parser")
     car_list = get_car_list(url)
-    car_name2 = soup.find("h2", class_="fn-left cartab-title-name").get_text()
+    car_name2 = soup.find("h2", class_="fn-left cartab-title-name")
+    car_name2 = re.findall(re.compile(r'<a class="font-16" href="(.*?)">(.*?)</a></h2>'), str(car_name2))[0][1]  # 正则表达式需要传入字符串
     for i in car_list:
         # 得到经销商报价
         headers = {'Accept': '*/*',
@@ -260,7 +256,8 @@ def stop_spider(url):
     content = htmlparser(url)
     soup = BeautifulSoup(content, "html.parser")
     car_list = get_car_list(url)
-    car_name2 = soup.find("h2", class_="fn-left cartab-title-name").get_text()
+    car_name2 = soup.find("h2", class_="fn-left cartab-title-name")
+    car_name2 = re.findall(re.compile(r'<a class="font-16" href="(.*?)">(.*?)</a></h2>'), str(car_name2))[0][1]  # 正则表达式需要传入字符串
     for i in car_list:
         # 得到经销商报价
         headers = {'Accept': '*/*',
@@ -298,7 +295,7 @@ def stop_spider(url):
         for k in car_model.find_all("div", class_="interval01"):
             car_model_size = k.find("div", class_="interval01-title title-cont")  # 6.0升 517马力的父节点
             car_model_size_only = car_model_size.find("div", class_="interval01-list-cars").get_text()  # 6.0升 517马力
-            print(car_model_size_only)
+            # print(car_model_size_only)
             car_model_size_value = k.find_all("ul", class_="interval01-list")  # 该属性的下属分类（具体类型）
             for g in car_model_size_value:
                 for li in g.find_all("li"):
@@ -344,7 +341,7 @@ def spider(i):
         for sort_name_2 in sort_name_3.find_all("a"):
             if (sort_name_2["title"] == "在售是指官方已经公布售价且正式在国内销售的车型"):
                 sort_url_courrent = "https://car.autohome.com.cn" + sort_name_2["href"]
-                print(sort_url_courrent)
+                # print(sort_url_courrent)
                 current_spider(sort_url_courrent)
                 content = htmlparser(sort_url_courrent)
                 soup = BeautifulSoup(content, "html.parser")
